@@ -27,9 +27,14 @@ pub fn blank_lines<F>(sequential_number: usize, filename: F) -> usize
         
         if buf.starts_with("\n") || buf.starts_with("\r") {
             blank_counter += 1;
-        } else if blank_counter >= sequential_number {
-            blank_counter  = 0;
-            final_counter += 1;
+        } else {
+            if final_counter == 0 {
+                final_counter += 1;
+            }
+            if blank_counter >= sequential_number {
+                blank_counter  = 0;
+                final_counter += 1;
+            }
         }
     }
     
