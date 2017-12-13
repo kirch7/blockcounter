@@ -9,7 +9,7 @@ pub fn blank_lines<F>(sequential_number: usize, filename: F) -> usize
         Err(e) => { panic!(e.to_string()); }
     };
     let mut file = BufReader::new(&file);
-    let mut blank_counter: usize = 0;
+    let mut blank_counter: usize = sequential_number;
     let mut final_counter: usize = 0;
     
     loop {
@@ -27,14 +27,9 @@ pub fn blank_lines<F>(sequential_number: usize, filename: F) -> usize
         
         if buf.starts_with("\n") || buf.starts_with("\r") {
             blank_counter += 1;
-        } else {
-            if final_counter == 0 {
-                final_counter += 1;
-            }
-            if blank_counter >= sequential_number {
-                blank_counter  = 0;
-                final_counter += 1;
-            }
+        } else if blank_counter >= sequential_number {
+            blank_counter  = 0;
+            final_counter += 1;
         }
     }
     
