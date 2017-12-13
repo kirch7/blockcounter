@@ -1,2 +1,2 @@
 # blockcounter
-Count double blank lines number.
+Count sequential blank lines number.
