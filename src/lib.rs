@@ -1,4 +1,3 @@
-use std::fs::File;
 use std::io::{BufRead, BufReader};
 use std::iter::Iterator;
 
@@ -75,14 +74,10 @@ impl<F> Iterator for Block<F>
     }
 }
 
-pub fn blank_lines<F>(tolerance: usize, filename: F) -> usize
-    where F: ::std::convert::AsRef<::std::path::Path> {
+pub fn blank_lines<S>(tolerance: usize, stream: S) -> usize
+    where S: ::std::io::Read {
     
-    let file = match File::open(filename) {
-        Ok(o)  => o,
-        Err(e) => { panic!(e.to_string()); }
-    };
-    let mut file = BufReader::new(&file);
+    let mut file = BufReader::new(stream);
     let mut blank_counter: usize = tolerance;
     let mut final_counter: usize = 0;
     
