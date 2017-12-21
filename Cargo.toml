@@ -1,6 +1,55 @@
 [package]
 name = "blockcounter"
-version = "0.1.1"
+version = "0.2.1"
 authors = ["Cassio Kirch <cassiokirch@gmail.com>"]
 
 [dependencies]
+
+[profile.dev]
+opt-level        = 0
+debug            = true
+lto              = false
+debug-assertions = true
+codegen-units    = 1
+
+[profile.release]
+opt-level        = 3
+debug            = false
+lto              = true
+debug-assertions = false
+codegen-units    = 1
+
+[profile.test]
+opt-level = 0
+debug = true
+lto = false
+debug-assertions = true
+codegen-units = 1
+
+[profile.bench]
+opt-level = 3
+debug = false
+lto = true
+debug-assertions = false
+codegen-units = 1
+
+[profile.doc]
+opt-level = 0
+debug = true
+lto = false
+debug-assertions = true
+codegen-units = 1
+
+
+[[example]]
+name = "00"
+
+[[example]]
+name = "01"
+
+[[example]]
+name = "02"
+
+[[example]]
+name = "03"
+
