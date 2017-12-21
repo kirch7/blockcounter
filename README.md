@@ -1,2 +1,2 @@
 # blockcounter
-Count sequential blank lines number.
+Count blocks in a text.
