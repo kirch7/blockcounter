@@ -7,7 +7,7 @@ keywords = ["gnuplot", "plain text", "text", "string", "file"]
 categories = ["Text processing"]
 licence = "GPL-3.0"
 licence-file = "LICENCE"
-readme = "README"
+readme = "README.md"
 repository = "https://github.com/kirch7/blockcounter"
 
 [dependencies]
