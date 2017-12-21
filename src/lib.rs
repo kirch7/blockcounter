@@ -1,17 +1,48 @@
+/*!
+A crate to count blocks in plain text.
+
+Consider a block a set of lines separated by a given number of empty lines.
+
+# Example
+
+```rust
+extern crate blockcounter;
+use blockcounter::{count_blocks, Blocks, clean};
+
+fn main() {
+    let text = "0\n1\n\n2\n\n\n3\n\n".to_string();
+    println!("{}", text);
+    println!("===========");
+    println!("text has {} blocks.", count_blocks(2, text.as_bytes()));
+    println!("======================");
+    println!("");
+    
+    for block in Blocks::new(2, text.as_bytes()) {
+        print!("{}", clean(&block));
+        println!("=============");
+    }
+}
+```
+
+*/
 use std::io::{BufRead, BufReader};
 use std::iter::Iterator;
 
-pub struct Block<F> {
+
+pub struct Blocks<F> {
     buffer:      BufReader<F>,
     last_line:   String,
     tolerable:   usize,
     started:     bool,
 }
 
-impl<F> Block<F>
+#[deprecated(since="0.2.1", note="please, use `Blocks` instead.")]
+pub type Block<F> = Blocks<F>;
+
+impl<F> Blocks<F>
     where F: ::std::io::Read {
     pub fn new(tolerable: usize, stream: F) -> Self {
-        Block {
+        Blocks {
             buffer:      BufReader::new(stream),
             last_line:   String::new(),
             tolerable:   tolerable,
@@ -20,7 +51,7 @@ impl<F> Block<F>
     }
 }
 
-impl<F> Iterator for Block<F>
+impl<F> Iterator for Blocks<F>
     where std::io::BufReader<F> : std::io::BufRead {
     type Item = String;
 
@@ -74,7 +105,13 @@ impl<F> Iterator for Block<F>
     }
 }
 
-pub fn blank_lines<S>(tolerance: usize, stream: S) -> usize
+#[deprecated(since="0.2.1", note="please, use `count_blocks` instead.")]
+pub fn blank_lines<S: ::std::io::Read>(tolerance: usize, stream: S) -> usize {
+    count_blocks(tolerance, stream)
+}
+
+/// Given a <em>tolerance</em> input, returns the number of blocks is a stream.
+pub fn count_blocks<S>(tolerance: usize, stream: S) -> usize
     where S: ::std::io::Read {
     
     let mut file = BufReader::new(stream);
@@ -122,6 +159,7 @@ fn is_blank(s: &String) -> bool {
     !some_non_blank_char
 }
 
+/// Removes blank lines at the beginnig and at the end of a <em>String</em>.
 pub fn clean(s: &String) -> String {
     remove_blank_at_end(&remove_blank_at_beginning(&s))
 }
