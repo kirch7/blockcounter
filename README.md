@@ -1,6 +1,6 @@
 # blockcounter
-[![Version info](https://img.shields.io/crates/v/parallel-gnuplot.svg)](https://crates.io/crates/parallel-gnuplot)
-[![Build Status](https://travis-ci.org/kirch7/parallel-gnuplot.svg?branch=master)](https://travis-ci.org/kirch7/parallel-gnuplot)
+[![Version info](https://img.shields.io/crates/v/blockcounter.svg)](https://crates.io/crates/blockcounter)
+[![Build Status](https://travis-ci.org/kirch7/blockcounter.svg?branch=master)](https://travis-ci.org/kirch7/blockcounter)
 Count blocks in a text.
 
 ### Example
