@@ -6,7 +6,6 @@ description = "Counts the blocks in a stream."
 keywords = ["gnuplot", "text", "string", "file"]
 categories = ["text-processing"]
 license = "GPL-3.0"
-license-file = "LICENSE"
 readme = "README.md"
 repository = "https://github.com/kirch7/blockcounter"
 documentation = "https://docs.rs/blockcounter"
