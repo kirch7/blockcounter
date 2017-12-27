@@ -16,5 +16,7 @@ script:
   - cargo test --verbose --all
 
 notifications:
-  email: cassiokirch@gmail.com
-on_success: never
+  email:
+    recipients:
+      - cassiokirch@gmail.com
+    on_success: always
