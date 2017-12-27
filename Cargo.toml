@@ -1,6 +1,6 @@
 [package]
 name = "blockcounter"
-version = "0.2.3"
+version = "0.2.4"
 authors = ["Cassio Kirch <cassiokirch@gmail.com>"]
 description = "Counts the blocks in a stream."
 keywords = ["gnuplot", "text", "string", "file"]
@@ -9,8 +9,13 @@ license = "GPL-3.0"
 license-file = "LICENSE"
 readme = "README.md"
 repository = "https://github.com/kirch7/blockcounter"
+documentation = "https://docs.rs/blockcounter"
 
 [dependencies]
+
+[badges]
+travis-ci = { repository = "kirch7/blockcounter" }
+appveyor = { repository = "kirch7/blockcounter" }
 
 [profile.dev]
 opt-level        = 0
