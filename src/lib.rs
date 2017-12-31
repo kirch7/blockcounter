@@ -337,6 +337,6 @@ fn clean_test() {
 #[test]
 fn clean_all_test() {
     let s = " \t\r\n\n\n\n\t\r  \n".to_string();
-    assert_eq!(clean_all(&s), "".to_string());
+    assert_eq!(clean_all_blank(&s), "".to_string());
 }
 
