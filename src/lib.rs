@@ -77,7 +77,7 @@ impl<F> Iterator for Blocks<F>
                     &Ok(0)  => { break; },
                     &Ok(_)  => {
                         if !self.started {
-                            if is_blank(&line) || ( /*comment_as_blank && */is_comment(&line, &self.comments) ) {
+                            if is_blank(&line) || is_comment(&line, &self.comments) {
                                 continue;
                             } else {
                                 self.started = true;
@@ -91,7 +91,7 @@ impl<F> Iterator for Blocks<F>
                 self.last_line = String::new();
             }
             
-            if is_blank(&line) || (/* comment_as_blank && */is_comment(&line, &self.comments) ) {
+            if is_blank(&line) || is_comment(&line, &self.comments) {
                 block += &line;
                 blank_counter += 1;
             } else {
