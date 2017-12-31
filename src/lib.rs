@@ -28,12 +28,12 @@ fn main() {
 use std::io::{BufRead, BufReader};
 use std::iter::Iterator;
 
-
 pub struct Blocks<F> {
-    buffer:      BufReader<F>,
-    last_line:   String,
-    tolerable:   usize,
-    started:     bool,
+    buffer:           BufReader<F>,
+    last_line:        String,
+    tolerable:        usize,
+    started:          bool,
+    comments:         Vec<String>,
 }
 
 #[deprecated(since="0.2.1", note="please, use `Blocks` instead.")]
@@ -43,10 +43,21 @@ impl<F> Blocks<F>
     where F: ::std::io::Read {
     pub fn new(tolerable: usize, stream: F) -> Self {
         Blocks {
-            buffer:      BufReader::new(stream),
-            last_line:   String::new(),
-            tolerable:   tolerable,
-            started:     false,
+            buffer:           BufReader::new(stream),
+            last_line:        String::new(),
+            tolerable:        tolerable,
+            started:          false,
+            comments:         Vec::new(),
+        }
+    }
+
+    pub fn new_with_comments(tolerable: usize, stream: F, comments: &Vec<String>) -> Self {
+        Blocks {
+            buffer:           BufReader::new(stream),
+            last_line:        String::new(),
+            tolerable:        tolerable,
+            started:          false,
+            comments:         comments.clone(),
         }
     }
 }
@@ -58,6 +69,7 @@ impl<F> Iterator for Blocks<F>
     fn next(&mut self) -> Option<Self::Item> {
         let mut block = String::new();
         let mut blank_counter = 0; //self.tolerable;
+        let comment_as_blank = self.comments.len() != 0;
         loop {
             let mut line = String::new();
             if self.last_line.len() == 0 {
@@ -65,7 +77,7 @@ impl<F> Iterator for Blocks<F>
                     &Ok(0)  => { break; },
                     &Ok(_)  => {
                         if !self.started {
-                            if is_blank(&line) {
+                            if is_blank(&line) || ( /*comment_as_blank && */is_comment(&line, &self.comments) ) {
                                 continue;
                             } else {
                                 self.started = true;
@@ -79,7 +91,7 @@ impl<F> Iterator for Blocks<F>
                 self.last_line = String::new();
             }
             
-            if is_blank(&line) {
+            if is_blank(&line) || (/* comment_as_blank && */is_comment(&line, &self.comments) ) {
                 block += &line;
                 blank_counter += 1;
             } else {
@@ -96,8 +108,23 @@ impl<F> Iterator for Blocks<F>
                 blank_counter = 0;
             }
         }
+        
+        let block_is_garbage = match comment_as_blank {
+            false => is_blank(&block),
+            true  => {
+                let mut all_garbage = true;
+                for line in block.lines() {
+                    let line = line.to_string();
+                    if !is_comment(&line, &self.comments) && !is_blank(&line) {
+                        all_garbage = false;
+                        break;
+                    }
+                }
+                all_garbage
+            },
+        };
 
-        if is_blank(&block) {
+        if block_is_garbage {
             None
         } else {
             Some(block)
@@ -139,6 +166,37 @@ pub fn count_blocks<S>(tolerance: usize, stream: S) -> usize
     final_counter
 }
 
+fn is_comment(s: &String, comments: &Vec<String>) -> bool {
+    if comments.len() == 0 {
+        return false;
+    }
+    
+    let mut s = s.clone();
+
+    loop {
+        let c0 = s.chars().nth(0);
+        if c0.is_none() {
+            break;
+        }
+        let c0 = c0
+            .unwrap()
+            .to_string();
+        if is_blank(&c0) {
+            let _ = s.remove(0);
+        } else {
+            break;
+        }
+        
+    }
+    for comment in comments {
+        if s.starts_with(comment) {
+            return true;
+        }
+    }
+    
+    false
+}
+
 fn is_blank(s: &String) -> bool {
     const EMPTY_CHARS: &[char] = &[' ', '\t', '\n', '\r'];
 
@@ -162,6 +220,17 @@ fn is_blank(s: &String) -> bool {
 /// Removes blank lines at the beginnig and at the end of a <em>String</em>.
 pub fn clean(s: &String) -> String {
     remove_blank_at_end(&remove_blank_at_beginning(&s))
+}
+
+/// Removes all blank lines of a <em>String</em>.
+pub fn clean_all_blank(s: &String) -> String {
+    let mut t = String::new();
+    for line in s.lines() {
+        if !is_blank(&line.to_string()) {
+            t += &line;
+        }
+    }
+    t
 }
 
 fn remove_blank_at_beginning(s: &String) -> String {
@@ -231,3 +300,43 @@ fn non_blank_is_non_blank() {
         panic!("is_blank(&String) problem.");
     }
 }
+
+#[test]
+fn comment_is_comment() {
+    let s = "\t//fldfjbas".to_string();
+    if !is_comment(&s, &vec!["//".to_string()]) {
+        panic!("is_blank(&String) problem.");
+    }
+}
+
+#[test]
+#[should_panic(expected = "is_comment(&String, &Vec<_>) problem.")]
+fn non_comment_is_non_comment() {
+    let s = " bhfjass".to_string();
+    if !is_comment(&s, &vec!["//".to_string()]) {
+        panic!("is_comment(&String, &Vec<_>) problem.");
+    }
+}
+
+#[test]
+fn blank_is_not_comment() {
+    let s = " \t\r\n".to_string();
+    if is_comment(&s, &vec!["a".to_string()]) {
+        panic!("is_comment(...) problem.");
+    }
+}
+
+#[test]
+fn clean_test() {
+    let s = " \t\r\n\n\n\t\r \n".to_string();
+    assert_eq!(clean(&s), "".to_string());
+    let s = "a\t\r\n\n\n\t\r \n".to_string();
+    assert_eq!(clean(&s), "a\t\r\n".to_string());
+}
+
+#[test]
+fn clean_all_test() {
+    let s = " \t\r\n\n\n\n\t\r  \n".to_string();
+    assert_eq!(clean_all(&s), "".to_string());
+}
+
