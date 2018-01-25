@@ -1,6 +1,6 @@
 [package]
 name = "blockcounter"
-version = "0.3.0"
+version = "0.3.1"
 authors = ["Cassio Kirch <cassiokirch@gmail.com>"]
 description = "Counts the blocks in a stream."
 keywords = ["gnuplot", "text", "string", "file"]
