@@ -47,19 +47,19 @@ where
         Blocks {
             buffer: BufReader::new(stream),
             last_line: String::new(),
-            tolerable: tolerable,
+            tolerable,
             started: false,
             comments: Vec::new(),
         }
     }
 
-    pub fn new_with_comments(tolerable: usize, stream: F, comments: &Vec<String>) -> Self {
+    pub fn new_with_comments(tolerable: usize, stream: F, comments: &[String]) -> Self {
         Blocks {
             buffer: BufReader::new(stream),
             last_line: String::new(),
-            tolerable: tolerable,
+            tolerable,
             started: false,
-            comments: comments.clone(),
+            comments: comments.to_owned(),
         }
     }
 }
@@ -73,15 +73,15 @@ where
     fn next(&mut self) -> Option<Self::Item> {
         let mut block = String::new();
         let mut blank_counter = 0; //self.tolerable;
-        let comment_as_blank = self.comments.len() != 0;
+        let comment_as_blank = !self.comments.is_empty();
         loop {
             let mut line = String::new();
-            if self.last_line.len() == 0 {
-                match &self.buffer.read_line(&mut line) {
-                    &Ok(0) => {
+            if self.last_line.is_empty() {
+                match self.buffer.read_line(&mut line) {
+                    Ok(0) => {
                         break;
                     }
-                    &Ok(_) => {
+                    Ok(_) => {
                         if !self.started {
                             if is_blank(&line) || is_comment(&line, &self.comments) {
                                 continue;
@@ -90,7 +90,7 @@ where
                             }
                         }
                     }
-                    &Err(ref e) => {
+                    Err(ref e) => {
                         panic!("{}", e.to_string());
                     }
                 }
@@ -117,19 +117,18 @@ where
             }
         }
 
-        let block_is_garbage = match comment_as_blank {
-            false => is_blank(&block),
-            true => {
-                let mut all_garbage = true;
-                for line in block.lines() {
-                    let line = line.to_string();
-                    if !is_comment(&line, &self.comments) && !is_blank(&line) {
-                        all_garbage = false;
-                        break;
-                    }
+        let block_is_garbage = if comment_as_blank {
+            let mut all_garbage = true;
+            for line in block.lines() {
+                let line = line.to_string();
+                if !is_comment(&line, &self.comments) && !is_blank(&line) {
+                    all_garbage = false;
+                    break;
                 }
-                all_garbage
             }
+            all_garbage
+        } else {
+            is_blank(&block)
         };
 
         if block_is_garbage {
@@ -182,12 +181,12 @@ where
     final_counter
 }
 
-fn is_comment(s: &String, comments: &Vec<String>) -> bool {
-    if comments.len() == 0 {
+fn is_comment(s: &str, comments: &[String]) -> bool {
+    if comments.is_empty() {
         return false;
     }
 
-    let mut s = s.clone();
+    let mut s = s.to_string();
 
     loop {
         let c0 = s.chars().nth(0);
@@ -210,7 +209,7 @@ fn is_comment(s: &String, comments: &Vec<String>) -> bool {
     false
 }
 
-fn is_blank(s: &String) -> bool {
+fn is_blank(s: &str) -> bool {
     const EMPTY_CHARS: &[char] = &[' ', '\t', '\n', '\r'];
 
     let mut some_non_blank_char = false;
@@ -231,12 +230,12 @@ fn is_blank(s: &String) -> bool {
 }
 
 /// Removes blank lines at the beginnig and at the end of a <em>String</em>.
-pub fn clean(s: &String) -> String {
+pub fn clean(s: &str) -> String {
     remove_blank_at_end(&remove_blank_at_beginning(&s))
 }
 
 /// Removes all blank lines of a <em>String</em>.
-pub fn clean_all_blank(s: &String) -> String {
+pub fn clean_all_blank(s: &str) -> String {
     let mut t = String::new();
     for line in s.lines() {
         if !is_blank(&line.to_string()) {
@@ -246,11 +245,11 @@ pub fn clean_all_blank(s: &String) -> String {
     t
 }
 
-fn remove_blank_at_beginning(s: &String) -> String {
-    let mut s = s.clone();
+fn remove_blank_at_beginning(s: &str) -> String {
+    let mut s = s.to_string();
     for line in s.clone().lines() {
         if is_blank(&line.to_string()) {
-            if line.len() == 0 {
+            if line.is_empty() {
                 let _ = s.remove(0);
             } else {
                 for _ in line.chars() {
@@ -265,27 +264,20 @@ fn remove_blank_at_beginning(s: &String) -> String {
     s
 }
 
-fn remove_blank_at_end(s: &String) -> String {
-    let mut s = s.clone();
+fn remove_blank_at_end(s: &str) -> String {
+    let mut s = s.to_string();
 
-    loop {
-        match s.clone().lines().last() {
-            Some(line) => {
-                if is_blank(&line.to_string()) {
-                    if line.len() == 0 {
-                        let _ = s.pop();
-                    } else {
-                        for _ in line.chars() {
-                            let _ = s.pop();
-                        }
-                    }
-                } else {
-                    break;
+    while let Some(line) = s.clone().lines().last() {
+        if is_blank(&line.to_string()) {
+            if line.is_empty() {
+                let _ = s.pop();
+            } else {
+                for _ in line.chars() {
+                    let _ = s.pop();
                 }
             }
-            None => {
-                break;
-            }
+        } else {
+            break;
         }
     }
     s
