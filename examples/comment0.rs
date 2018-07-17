@@ -1,13 +1,15 @@
 extern crate blockcounter;
 
 fn main() {
-    let lines = vec!["   // comment",
-                     "// comment",
-                     "   non-comment",
-                     "non-comment",
-                     "//",
-                     "",
-                     "non-comment"];
+    let lines = vec![
+        "   // comment",
+        "// comment",
+        "   non-comment",
+        "non-comment",
+        "//",
+        "",
+        "non-comment",
+    ];
     let text = {
         let mut text = String::new();
         for line in lines {

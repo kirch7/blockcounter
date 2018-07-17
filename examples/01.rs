@@ -4,7 +4,7 @@ use std::fs::File;
 use std::io::Write;
 
 mod deletable;
-use deletable::{DELETABLE_FILENAME};
+use deletable::DELETABLE_FILENAME;
 
 const DELETABLE_TEXT: &[u8] = b"block 0\nblock 1\n\nblock 2\n\n\nblock 3\n\n\n\nblock 4\n\n\n\n\nblock 5\n\n\n\n\n\nblock 6\n\n\n\n\n\n\nblock 7\n\n\n";
 const MAX_EXPECTED_BLOCKS_NO: usize = 8;
@@ -28,8 +28,5 @@ fn main() {
             print!("{}", blockcounter::clean(&block));
             println!("====================================");
         }
-        
     }
-
-    
 }

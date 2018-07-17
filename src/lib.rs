@@ -29,41 +29,45 @@ use std::io::{BufRead, BufReader};
 use std::iter::Iterator;
 
 pub struct Blocks<F> {
-    buffer:           BufReader<F>,
-    last_line:        String,
-    tolerable:        usize,
-    started:          bool,
-    comments:         Vec<String>,
+    buffer: BufReader<F>,
+    last_line: String,
+    tolerable: usize,
+    started: bool,
+    comments: Vec<String>,
 }
 
-#[deprecated(since="0.2.1", note="please, use `Blocks` instead.")]
+#[deprecated(since = "0.2.1", note = "please, use `Blocks` instead.")]
 pub type Block<F> = Blocks<F>;
 
 impl<F> Blocks<F>
-    where F: ::std::io::Read {
+where
+    F: ::std::io::Read,
+{
     pub fn new(tolerable: usize, stream: F) -> Self {
         Blocks {
-            buffer:           BufReader::new(stream),
-            last_line:        String::new(),
-            tolerable:        tolerable,
-            started:          false,
-            comments:         Vec::new(),
+            buffer: BufReader::new(stream),
+            last_line: String::new(),
+            tolerable: tolerable,
+            started: false,
+            comments: Vec::new(),
         }
     }
 
     pub fn new_with_comments(tolerable: usize, stream: F, comments: &Vec<String>) -> Self {
         Blocks {
-            buffer:           BufReader::new(stream),
-            last_line:        String::new(),
-            tolerable:        tolerable,
-            started:          false,
-            comments:         comments.clone(),
+            buffer: BufReader::new(stream),
+            last_line: String::new(),
+            tolerable: tolerable,
+            started: false,
+            comments: comments.clone(),
         }
     }
 }
 
 impl<F> Iterator for Blocks<F>
-    where std::io::BufReader<F> : std::io::BufRead {
+where
+    std::io::BufReader<F>: std::io::BufRead,
+{
     type Item = String;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -74,8 +78,10 @@ impl<F> Iterator for Blocks<F>
             let mut line = String::new();
             if self.last_line.len() == 0 {
                 match &self.buffer.read_line(&mut line) {
-                    &Ok(0)  => { break; },
-                    &Ok(_)  => {
+                    &Ok(0) => {
+                        break;
+                    }
+                    &Ok(_) => {
                         if !self.started {
                             if is_blank(&line) || is_comment(&line, &self.comments) {
                                 continue;
@@ -83,14 +89,16 @@ impl<F> Iterator for Blocks<F>
                                 self.started = true;
                             }
                         }
-                    },
-                    &Err(ref e) => { panic!("{}", e.to_string()); },
+                    }
+                    &Err(ref e) => {
+                        panic!("{}", e.to_string());
+                    }
                 }
             } else {
                 line = self.last_line.clone();
                 self.last_line = String::new();
             }
-            
+
             if is_blank(&line) || is_comment(&line, &self.comments) {
                 block += &line;
                 blank_counter += 1;
@@ -108,10 +116,10 @@ impl<F> Iterator for Blocks<F>
                 blank_counter = 0;
             }
         }
-        
+
         let block_is_garbage = match comment_as_blank {
             false => is_blank(&block),
-            true  => {
+            true => {
                 let mut all_garbage = true;
                 for line in block.lines() {
                     let line = line.to_string();
@@ -121,7 +129,7 @@ impl<F> Iterator for Blocks<F>
                     }
                 }
                 all_garbage
-            },
+            }
         };
 
         if block_is_garbage {
@@ -132,27 +140,35 @@ impl<F> Iterator for Blocks<F>
     }
 }
 
-#[deprecated(since="0.2.1", note="please, use `count_blocks` instead.")]
+#[deprecated(
+    since = "0.2.1",
+    note = "please, use `count_blocks` instead."
+)]
 pub fn blank_lines<S: ::std::io::Read>(tolerance: usize, stream: S) -> usize {
     count_blocks(tolerance, stream)
 }
 
 /// Given a <em>tolerance</em> input, returns the number of blocks is a stream.
 pub fn count_blocks<S>(tolerance: usize, stream: S) -> usize
-    where S: ::std::io::Read {
-    
+where
+    S: ::std::io::Read,
+{
     let mut file = BufReader::new(stream);
     let mut blank_counter: usize = tolerance;
     let mut final_counter: usize = 0;
-    
+
     loop {
         let mut line = String::new();
         match file.read_line(&mut line) {
-            Ok(0)  => { break; }, // EOF
-            Ok(_)  => { },
-            Err(e) => { panic!("{}", e.to_string()); },
+            Ok(0) => {
+                break;
+            } // EOF
+            Ok(_) => {}
+            Err(e) => {
+                panic!("{}", e.to_string());
+            }
         }
-        
+
         if is_blank(&line) {
             blank_counter += 1;
         } else {
@@ -162,7 +178,7 @@ pub fn count_blocks<S>(tolerance: usize, stream: S) -> usize
             blank_counter = 0;
         }
     }
-    
+
     final_counter
 }
 
@@ -170,7 +186,7 @@ fn is_comment(s: &String, comments: &Vec<String>) -> bool {
     if comments.len() == 0 {
         return false;
     }
-    
+
     let mut s = s.clone();
 
     loop {
@@ -178,22 +194,19 @@ fn is_comment(s: &String, comments: &Vec<String>) -> bool {
         if c0.is_none() {
             break;
         }
-        let c0 = c0
-            .unwrap()
-            .to_string();
+        let c0 = c0.unwrap().to_string();
         if is_blank(&c0) {
             let _ = s.remove(0);
         } else {
             break;
         }
-        
     }
     for comment in comments {
         if s.starts_with(comment) {
             return true;
         }
     }
-    
+
     false
 }
 
@@ -248,13 +261,13 @@ fn remove_blank_at_beginning(s: &String) -> String {
             break;
         }
     }
-    
+
     s
 }
 
 fn remove_blank_at_end(s: &String) -> String {
     let mut s = s.clone();
-    
+
     loop {
         match s.clone().lines().last() {
             Some(line) => {
@@ -269,8 +282,10 @@ fn remove_blank_at_end(s: &String) -> String {
                 } else {
                     break;
                 }
-            },
-            None       => { break; },
+            }
+            None => {
+                break;
+            }
         }
     }
     s
@@ -339,4 +354,3 @@ fn clean_all_test() {
     let s = " \t\r\n\n\n\n\t\r  \n".to_string();
     assert_eq!(clean_all_blank(&s), "".to_string());
 }
-
