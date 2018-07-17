@@ -1,11 +1,11 @@
 [package]
 name = "blockcounter"
-version = "0.3.1"
-authors = ["Cassio Kirch <cassiokirch@gmail.com>"]
+version = "0.3.2"
+authors = ["Cassio Kirch <cassio@kirch7.com>"]
 description = "Counts the blocks in a stream."
 keywords = ["gnuplot", "text", "string", "file"]
 categories = ["text-processing"]
-license = "LGPL-3.0"
+license = "MIT"
 readme = "README.md"
 repository = "https://github.com/kirch7/blockcounter"
 documentation = "https://docs.rs/blockcounter"
