@@ -3,11 +3,8 @@ extern crate blockcounter;
 use std::fs::File;
 use std::io::Write;
 
-mod deletable;
-use deletable::DELETABLE_FILENAME;
-
+const DELETABLE_FILENAME: &str = "can_be_deleted.txt";
 const DELETABLE_TEXT: &[u8] = b"block 0\r\nblock 1\r\n\r\nblock 2\r\n\r\n\r\nblock 3\r\n\r\n\r\n\r\nblock 4\r\n\r\n\r\n\r\n\r\nblock 5\r\n\r\n\r\n\r\n\r\n\r\nblock 6\r\n\r\n\r\n\r\n\r\n\r\n\r\nblock 7\r\n\r\n\r\n";
-
 const MAX_EXPECTED_BLOCKS_NO: usize = 8;
 
 fn main() {
