@@ -21,7 +21,7 @@ platform: Any CPU
 notifications:
   - provider: Email
     to:
-      - cassiokirch@gmail.com
+      - cassio@kirch7.com
     #subject: 'Build {{status}}'                  # optional
     #message: "{{message}}, {{commitId}}, ..."    # optional
     on_build_success: true

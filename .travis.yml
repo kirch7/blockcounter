@@ -18,5 +18,5 @@ script:
 notifications:
   email:
     recipients:
-      - cassiokirch@gmail.com
+      - cassio@kirch7.com
     on_success: always
